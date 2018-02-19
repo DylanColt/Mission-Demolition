@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Slingshot : MonoBehaviour {
     static private Slingshot S;
+    public bool flag = true;
 
     //fields set in the Unity Inspector pane
     [Header("Set in Inspector")]
@@ -50,6 +51,9 @@ public class Slingshot : MonoBehaviour {
 
     void OnMouseDown()
     {
+        //Can't create projectiles if flag is off
+        if (!flag) return;
+
         //the player has pressed the mouse button while over Slingshot
         aimingMode = true;
         //Instantiate a Projectile
@@ -63,8 +67,10 @@ public class Slingshot : MonoBehaviour {
 
     void Update()
     {
-        //If Slingshot is not in aimingMode, don't run this code
-        if (!aimingMode) return;
+        //If we fired, flag will be false, this will make us invoke ResetFlag after 3 seconds has passed
+        if (flag == false) Invoke("ResetFlag", 3);
+        //If Slingshot is not in aimingMode or flag is off, don't run this code
+        if (!aimingMode || !flag) return;
 
         //Get the current mouse position in 2D screen coordinates
         Vector3 mousePos2D = Input.mousePosition;
@@ -89,6 +95,7 @@ public class Slingshot : MonoBehaviour {
         {
             //The mouse has been released
             aimingMode = false;
+            flag = false;
             projectileRigidbody.isKinematic = false;
             projectileRigidbody.velocity = -mouseDelta * velocityMult;
             FollowCam.POI = projectile;
@@ -96,5 +103,10 @@ public class Slingshot : MonoBehaviour {
             MissionDemolition.ShotFired();
             ProjectileLine.S.poi = projectile;
         }
+    }
+
+    void ResetFlag()
+    {
+        flag = true;
     }
 }
